@@ -1,0 +1,15 @@
+[package]
+name = "simple-alert-rs"
+version = "0.1.0"
+authors = ["lightsing <light.tsing@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+log = "0.4.8"
+pretty_env_logger = "0.4.0"
+
+[dependencies.hyper]
+version = "0.13.4"
+[dependencies.tokio]
+version = "0.2.18"
+features = ["full"]
