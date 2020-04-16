@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: rust-cargo
+    - uses: actions-rs/cargo@v1
       with:
         command: build
         args: --release
@@ -23,7 +23,7 @@ jobs:
         toolchain: stable
         target: x86_64-unknown-linux-musl
         override: true
-    - name: rust-cargo
+    - uses: actions-rs/cargo@v1
       with:
         use-cross: true
         command: build
@@ -37,7 +37,7 @@ jobs:
         toolchain: stable
         target: x86_64-pc-windows-msvc
         override: true
-    - name: rust-cargo
+    - uses: actions-rs/cargo@v1
       with:
         use-cross: true
         command: build
