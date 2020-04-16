@@ -1,4 +1,6 @@
 #[macro_use] extern crate log;
+use hyper::{Client, Server};
+use hyper::service::{make_service_fn, service_fn};
 
 mod service;
 mod prelude;
