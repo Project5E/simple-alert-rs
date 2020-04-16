@@ -3,9 +3,9 @@ use hyper::client::HttpConnector;
 use chrono::Local;
 
 use crate::prelude::*;
-use crate::service::client;
+use crate::service::{client, Webhook};
 
-pub(crate) async fn response(req: Request<Body>, _client: Client<HttpConnector>) -> Result<Response<Body>> {
+pub(crate) async fn response(req: Request<Body>, _client: Client<HttpConnector>, webhook: Webhook) -> Result<Response<Body>> {
     info!("{} {} {}", Local::now().format("%T"), req.method(), req.uri());
     match (req.method(), req.uri().path()) {
         (&Method::GET, "/") => {
@@ -13,7 +13,7 @@ pub(crate) async fn response(req: Request<Body>, _client: Client<HttpConnector>)
                 .status(StatusCode::NO_CONTENT)
                 .body("".into())?)
         }
-        (&Method::POST, "/wx") => client::api_post_response(req).await,
+        (&Method::POST, "/wx") => client::api_post_response(req, webhook).await,
         (&Method::POST, _) => {
             Ok(Response::builder()
                 .status(StatusCode::METHOD_NOT_ALLOWED)

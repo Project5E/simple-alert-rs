@@ -4,8 +4,9 @@ use hyper_tls::HttpsConnector;
 use serde_json::json;
 
 use crate::prelude::*;
+use crate::service::Webhook;
 
-pub(crate) async fn api_post_response(req: Request<Body>) -> Result<Response<Body>> {
+pub(crate) async fn api_post_response(req: Request<Body>, webhook: Webhook) -> Result<Response<Body>> {
     let whole_body = hyper::body::aggregate(req).await?;
     let data: serde_json::Value = serde_json::from_reader(whole_body.reader())?;
 
@@ -24,7 +25,7 @@ pub(crate) async fn api_post_response(req: Request<Body>) -> Result<Response<Bod
     let client = Client::builder().build::<_, hyper::Body>(https);
     let wx_req = Request::builder()
         .method(Method::POST)
-        .uri("wx_hook")
+        .uri(webhook.wx)
         .header("content-type", "application/json")
         .body(serde_json::to_string(&md_req)?.into())?;
     let wx_resp = client.request(wx_req).await?;

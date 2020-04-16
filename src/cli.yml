@@ -1,0 +1,16 @@
+name: simple-alert
+version: "0.0.1"
+author: Akase Cho <light.tsing@gmail.com>
+about: Bridge grafana webhook to other webhooks
+args:
+  - bind:
+      short: b
+      long: bind
+      value_name: HOST
+      help: Specify the host to listen
+      takes_value: true
+  - wx-hook:
+      long: wx-hook
+      value_name: WX_HOOK
+      help: Specify the enterprise wechat bot webhook url
+      takes_value: true
