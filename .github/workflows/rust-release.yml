@@ -1,0 +1,118 @@
+name: Rust-release
+
+on:
+  push:
+    branches: [ master ]
+    tags:
+      - v*
+
+jobs:
+  matrix-build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+        rust: [stable]
+    steps:
+      - uses: hecrj/setup-rust-action@v1
+        with:
+          rust-version: ${{ matrix.rust }}
+      - uses: actions/checkout@master
+      - run: cargo build --release
+      - uses: actions/upload-artifact@v1
+        if: matrix.os == 'ubuntu-latest'
+        with:
+          name: simple-alert-rs-linux-amd64-glibc
+          path: target/release/simple-alert-rs
+      - uses: actions/upload-artifact@v1
+        if: matrix.os == 'macOS-latest'
+        with:
+          name: simple-alert-rs-darwin
+          path: target/release/simple-alert-rs
+      - uses: actions/upload-artifact@v1
+        if: matrix.os == 'windows-latest'
+        with:
+          name: simple-alert-rs-x86_64.exe
+          path: target/release/simple-alert-rs.exe
+  alpine:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: Project5E/rust-musl-action@master
+      with:
+        args: cargo build --release
+    - uses: actions/upload-artifact@v1
+      with:
+        name: simple-alert-rs-linux-amd64-musl
+        path: target/release/simple-alert-rs
+  release:
+    name: Create Github Release
+    needs: [matrix-build, alpine]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+      - name: Output Release URL File
+        run: echo "${{ steps.create_release.outputs.upload_url }}" > release_url.txt
+      - name: Save Release URL File for publish
+        uses: actions/upload-artifact@v1
+        with:
+          name: release_url
+          path: release_url.txt
+  upload-release:
+    name: Upload Release Asset
+    needs: [release]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        suffix: [linux-amd64-glibc, linux-amd64-musl, darwin, x86_64.exe]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Load Release URL File from release job
+        uses: actions/download-artifact@v1
+        with:
+          name: release_url
+      - name: Download the build artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: simple-alert-rs-${{ matrix.suffix }}
+          path: ./
+      - name: Get Release File Name & Upload URL
+        id: get_release_info
+        run: |
+          echo ::set-output name=tag_name::${TAG_REF_NAME##*/v} # RepositoryName-v1.0.0
+          value=`cat release_url/release_url.txt`
+          echo ::set-output name=upload_url::$value
+        env:
+          TAG_REF_NAME: ${{ github.ref }}
+          REPOSITORY_NAME: ${{ github.repository }}
+      - name: Upload Release Asset
+        id: upload-release-asset
+        if: matrix.suffix != 'x86_64.exe'
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.get_release_info.outputs.upload_url }}
+          asset_path: ./simple-alert-rs
+          asset_name: simple-alert-rs-${{ matrix.suffix }}-${{ steps.get_release_info.outputs.tag_name }}
+          asset_content_type: application/octet-stream
+      - name: Upload Release Asset
+        id: upload-release-asset
+        if: matrix.suffix == 'x86_64.exe'
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.get_release_info.outputs.upload_url }}
+          asset_path: ./simple-alert-rs.exe
+          asset_name: simple-alert-rs-${{ matrix.suffix }}-${{ steps.get_release_info.outputs.tag_name }}
+          asset_content_type: application/octet-stream
