@@ -1,5 +1,6 @@
 #[macro_use] extern crate log;
 #[macro_use] extern crate clap;
+use std::sync::Arc;
 
 use clap::App;
 use hyper::{Client, Server};
@@ -20,9 +21,9 @@ async fn main() {
     let addr = matches.value_of("bind")
         .unwrap_or("127.0.0.1:3000").parse().unwrap();
 
-    let webhook = Webhook {
-        wx: matches.value_of("wx-hook").expect("WX_HOOK is required").to_string()
-    };
+    let webhook = Arc::new(Webhook {
+        wx: Arc::new(matches.value_of("wx-hook").expect("WX_HOOK is required").to_string())
+    });
 
     // Share a `Client` with all `Service`s
     let client = Client::new();
@@ -34,7 +35,7 @@ async fn main() {
         async {
             Ok::<_, GenericError>(service_fn(move |req| {
                 // Clone again to ensure that client outlives this closure.
-                response(req, client.to_owned(), webhook.to_owned())
+                response(req, client.to_owned(), webhook.clone())
             }))
         }
     });

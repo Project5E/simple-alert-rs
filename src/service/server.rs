@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use hyper::{Body, Client, Method, Request, Response, StatusCode};
 use hyper::client::HttpConnector;
 use chrono::Local;
@@ -5,7 +7,7 @@ use chrono::Local;
 use crate::prelude::*;
 use crate::service::{client, Webhook};
 
-pub(crate) async fn response(req: Request<Body>, _client: Client<HttpConnector>, webhook: Webhook) -> Result<Response<Body>> {
+pub(crate) async fn response(req: Request<Body>, _client: Client<HttpConnector>, webhook: Arc<Webhook>) -> Result<Response<Body>> {
     info!("{} {} {}", Local::now().format("%T"), req.method(), req.uri());
     match (req.method(), req.uri().path()) {
         (&Method::GET, "/") => {
