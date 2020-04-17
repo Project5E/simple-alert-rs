@@ -106,7 +106,7 @@ jobs:
           asset_name: simple-alert-rs-${{ matrix.suffix }}-${{ steps.get_release_info.outputs.tag_name }}
           asset_content_type: application/octet-stream
       - name: Upload Release Asset
-        id: upload-release-asset
+        id: upload-release-asset-win
         if: matrix.suffix == 'x86_64.exe'
         uses: actions/upload-release-asset@v1.0.1
         env:
