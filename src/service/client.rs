@@ -9,7 +9,10 @@ use serde_json::json;
 use crate::prelude::*;
 use crate::service::Webhook;
 
-pub(crate) async fn api_post_response(req: Request<Body>, webhook: Arc<Webhook>) -> Result<Response<Body>> {
+pub(crate) async fn api_post_response(
+    req: Request<Body>,
+    webhook: Arc<Webhook>
+) -> Result<Response<Body>> {
     let whole_body = hyper::body::aggregate(req).await?;
     let data: serde_json::Value = serde_json::from_reader(whole_body.reader())?;
 

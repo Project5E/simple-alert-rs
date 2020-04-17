@@ -22,7 +22,11 @@ async fn main() {
         .unwrap_or("127.0.0.1:3000").parse().unwrap();
 
     let webhook = Arc::new(Webhook {
-        wx: Arc::new(matches.value_of("wx-hook").expect("WX_HOOK is required").to_string())
+        wx: Arc::new(
+            matches.value_of("wx-hook")
+                .expect("WX_HOOK is required")
+                .to_string()
+        )
     });
 
     // Share a `Client` with all `Service`s
