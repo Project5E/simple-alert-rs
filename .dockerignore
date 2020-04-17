@@ -1,0 +1,18 @@
+# Project files
+README.md
+LICENSE
+Cargo.lock
+target
+
+# git and GitHub
+.git
+.github
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+
+# IDEA
+.idea
+*.iml
