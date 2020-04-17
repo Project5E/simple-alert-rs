@@ -2,7 +2,6 @@ name: Rust-release
 
 on:
   push:
-    branches: [ master ]
     tags:
       - v*
 
@@ -34,20 +33,9 @@ jobs:
         with:
           name: simple-alert-rs-x86_64.exe
           path: target/release/simple-alert-rs.exe
-  alpine:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - uses: Project5E/rust-musl-action@master
-      with:
-        args: cargo build --release
-    - uses: actions/upload-artifact@v1
-      with:
-        name: simple-alert-rs-linux-amd64-musl
-        path: target/release/simple-alert-rs
   release:
     name: Create Github Release
-    needs: [matrix-build, alpine]
+    needs: [matrix-build]
     runs-on: ubuntu-latest
     steps:
       - name: Create Release
@@ -73,7 +61,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        suffix: [linux-amd64-glibc, linux-amd64-musl, darwin, x86_64.exe]
+        suffix: [linux-amd64-glibc, darwin, x86_64.exe]
     steps:
       - uses: actions/checkout@v2
       - name: Load Release URL File from release job
